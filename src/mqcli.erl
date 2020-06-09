@@ -76,11 +76,11 @@ init([]) ->
   io:format("publisher connect success. ConnPid: ~p~n", [Connection]),
   {ok, Channel} = amqp_connection:open_channel(Connection),
   io:format("publisher channel: ~p~n", [Channel]),
-  amqp_channel:call(Channel, #'exchange.declare'{
+  #'exchange.declare_ok'{} = amqp_channel:call(Channel, #'exchange.declare'{
     exchange = <<"test">>,
     durable  = true
   }),
-  io:format("publisher channel: ~p~n", [Channel]),
+  io:format("publisher declare exchange: ~p~n", [<<"test">>]),
   {ok, #mqcli_state{
     connection = Connection,
     channel = Channel

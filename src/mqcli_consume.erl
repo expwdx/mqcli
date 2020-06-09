@@ -69,31 +69,59 @@ init([]) ->
 %%                     end,
 
   io:format("consumer connect success. ConnPid: ~p~n", [Connection]),
+
   {ok, Channel} = amqp_connection:open_channel(Connection),
   io:format("consumer channel: ~p~n", [Channel]),
-  #'queue.declare_ok'{queue = Q} = amqp_channel:call(Channel, #'queue.declare'{queue = <<"test">>}),
+
+  #'exchange.declare_ok'{} = amqp_channel:call(Channel, #'exchange.declare'{
+    exchange = <<"test">>,
+    durable  = true
+  }),
+  io:format("consumer declare exchange: ~p~n", [<<"test">>]),
+
+  #'queue.declare_ok'{queue = Q} = amqp_channel:call(Channel, #'queue.declare'{queue = <<"erlang">>, durable = false}),
   io:format("declare queue: ~p~n", [Q]),
-%%  Binding = #'queue.bind'{queue = Q,
-%%    exchange    = "test",
-%%    routing_key = "he"
-%%  },
-%%  #'queue.bind_ok'{} = amqp_channel:call(Channel, Binding),
 
-  %% Poll for a message
-  Get = #'basic.get'{queue = Q},
-  {#'basic.get_ok'{delivery_tag = Tag}, Content}
-    = amqp_channel:call(Channel, Get),
 
-  %% Do something with the message payload
-  %% (some work here)
+  Binding = #'queue.bind'{queue = Q,
+    exchange = <<"test">>,
+    routing_key = <<"he">>
+  },
+  #'queue.bind_ok'{} = amqp_channel:call(Channel, Binding),
+  io:format("binding queue: ~p~n", [Q]),
 
-  %% Ack the message
-  amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
+  #'basic.consume_ok'{consumer_tag = Tag} =
+    amqp_channel:call(Channel, #'basic.consume'{queue = Q}, self()),
+  io:format("create consumer: ~p~n", [Tag]),
+
+  read(Channel),
 
   {ok, #mqcli_consume_state{
     connection = Connection,
     channel = Channel
   }}.
+
+read(Channel) ->
+  receive
+  %% This is the first message received
+    #'basic.consume_ok'{} ->
+      read(Channel);
+
+  %% This is received when the subscription is cancelled
+    #'basic.cancel_ok'{} ->
+      ok;
+
+  %% A delivery
+    {#'basic.deliver'{delivery_tag = Tag}, Content} ->
+      %% Do something with the message payload
+      %% (some work here)
+
+      %% Ack the message
+      amqp_channel:cast(Channel, #'basic.ack'{delivery_tag = Tag}),
+
+      %% Loop
+      read(Channel)
+  end.
 
 %% @private
 %% @doc Handling call messages

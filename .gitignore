@@ -18,5 +18,5 @@ rebar.lock
 test/ct.cover.spec
 .rebar3
 .idea
-.iml
+*.iml
 log

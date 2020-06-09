@@ -47,8 +47,8 @@ start(_StartType, _StartArgs) ->
 %%  lager:start(),
 %%  lager:error("Some message"),
   start_child(Sup, mqcli),
+  publish_msg(),
   start_child(Sup, mqcli_consume),
-  test(),
   {ok, Sup}.
 
 %%--------------------------------------------------------------------
@@ -78,10 +78,11 @@ worker_spec(Module) ->
 worker_spec(M, F, A) ->
   {M, {M, F, A}, permanent, 10000, worker, [M]}.
 
-test() ->
-  mqcli:publish("test", "he", <<"hello">>),
-  timer:sleep(500),
-  test().
+publish_msg() ->
+  mqcli:publish(<<"test">>, <<"he">>, <<"hello">>),
+  io:format("send msg"),
+  timer:sleep(50),
+  publish_msg().
 
 test1() ->
   {ok, Connection} =
