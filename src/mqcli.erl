@@ -60,7 +60,7 @@ init([]) ->
       io:format("start amqp client success.~n"),
       ok;
     {error, {already_started, Application}} ->
-      io:format("amqp client already started.~n"),
+      io:format("amqp client already started.~p~n", [Application]),
       ok;
     Error ->
       io:format("start amqp client error.~n"),
