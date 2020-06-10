@@ -14,6 +14,7 @@
     kernel,
     stdlib,
     jsx,
+    sasl,
     lager,
     amqp_client,
     rabbit_common

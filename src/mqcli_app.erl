@@ -39,14 +39,21 @@
   {ok, pid(), State :: term()} |
   {error, Reason :: term()}).
 start(_StartType, _StartArgs) ->
+  lager:start(),
   Sup = case mqcli_sup:start_link() of
     {ok, Pid} -> Pid;
     {error, {already_started, Pid}} -> Pid
   end,
   io:format("application start, PID: ~p~n", [Sup]),
 %%  application:get_env(lager),
-%%  lager:start(),
-%%  lager:error("Some message"),
+
+  lager:error("Some message"),
+  case application:get_env(?APP, routes) of
+    {ok, Routes} ->
+      lager:info("get routes from application env success. routes:~p~n", Routes);
+    undefined ->
+      lager:error("get routes fail.")
+  end,
   start_child(Sup, mqcli),
   start_child(Sup, mqcli_hook),
   publish_msg(),
