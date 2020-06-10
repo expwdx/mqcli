@@ -29,7 +29,10 @@
 -spec(publish(Exchange:: binary() | bitstring(), RoutingKey:: binary(), Msg:: term() | iodata() | binary()) -> ok).
 publish(Exchange, RoutingKey, Msg) when is_binary(Msg) ->
   gen_server:cast(?MODULE, {publish, Exchange, RoutingKey, Msg}),
-  ok.
+  ok;
+
+publish(Exchange, RoutingKey, Msg) ->
+  publish(Exchange, RoutingKey, jiffy:encode(Msg)).
 
 
 %%%===================================================================
@@ -63,16 +66,7 @@ init([]) ->
       io:format("start amqp client error.~n"),
       Error
   end,
-%%  {ok, ConfigSpecs} = application:get_env(?APP, amqp_uri),
-%%  {ok, AmqpConfig} = amqp_uri:parse(ConfigSpecs),
-%%  {ok, Connection} = amqp_connection:start(AmqpConfig),
   {ok, Connection} = amqp_connection:start(#amqp_params_network{port = 5672}),
-%%  {ok, Connection} = case amqp_connection:start(#amqp_params_network{}) of
-%%                       {ok, _Connection} ->
-%%                         io:format("publisher connect success. ConnPid: ~p~n", [_Connection]);
-%%                       {error, _Error} ->
-%%                         io:format("publisher connect fail. Error: ~p~n", [_Error])
-%%                     end,
   io:format("publisher connect success. ConnPid: ~p~n", [Connection]),
   {ok, Channel} = amqp_connection:open_channel(Connection),
   io:format("publisher channel: ~p~n", [Channel]),
@@ -107,9 +101,8 @@ handle_call(_Request, _From, State = #mqcli_state{}) ->
   {stop, Reason :: term(), NewState :: #mqcli_state{}}).
 handle_cast({publish, Exchange, RKey, Msg}, State = #mqcli_state{}) ->
   %% Publish a message
-  Payload = <<"foobar">>,
   Publish = #'basic.publish'{exchange = Exchange, routing_key = RKey },
-  amqp_channel:cast(State#mqcli_state.channel, Publish, #amqp_msg{payload = Payload}),
+  amqp_channel:cast(State#mqcli_state.channel, Publish, #amqp_msg{payload = Msg}),
   {noreply, State}.
 
 %% @private

@@ -11,11 +11,12 @@
 
 -behaviour(application).
 
+-include_lib("amqp_client/include/amqp_client.hrl").
+-include("mqcli.hrl").
+
 %% Application callbacks
 -export([start/2,
   stop/1]).
-
--include_lib("amqp_client/include/amqp_client.hrl").
 
 %%%===================================================================
 %%% Application callbacks
@@ -47,8 +48,8 @@ start(_StartType, _StartArgs) ->
 %%  lager:start(),
 %%  lager:error("Some message"),
   start_child(Sup, mqcli),
+  start_child(Sup, mqcli_hook),
   publish_msg(),
-  start_child(Sup, mqcli_consume),
   {ok, Sup}.
 
 %%--------------------------------------------------------------------
@@ -79,9 +80,9 @@ worker_spec(M, F, A) ->
   {M, {M, F, A}, permanent, 10000, worker, [M]}.
 
 publish_msg() ->
-  mqcli:publish(<<"test">>, <<"he">>, <<"hello">>),
-  io:format("send msg"),
-  timer:sleep(50),
+  mqcli_hook:on_message_publish(#message{from = testpush, topic = <<"/test">>, payload = #{<<"hello">> => <<"world">>}}, <<"_">>),
+  io:format("send msg~n~n~n"),
+  timer:sleep(2000),
   publish_msg().
 
 test1() ->
