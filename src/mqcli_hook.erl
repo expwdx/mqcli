@@ -43,6 +43,7 @@
 -spec(start_link() ->
   {ok, Pid :: pid()} | ignore | {error, Reason :: term()}).
 start_link() ->
+  lager:start(),
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %%--------------------------------------------------------------------
@@ -66,11 +67,9 @@ on_message_publish(Message = #message{topic = <<"$SYS/", _/binary>>}, _Env) ->
   {ok, Message};
 
 on_message_publish(Message = #message{}, _Env) ->
-  io:format("Publish Debug Start"),
-  io:format("Publish emqx ~s~n", [format(Message)]),
-  io:format("Publish haha---------------------------"),
+  lager:debug("Publish emqx ~s~n", [format(Message)]),
   _Payload = Message#message.payload,
-  io:format("Publish emqx payload ~p~n", [_Payload]),
+  lager:debug("Publish emqx payload ~p~n", [_Payload]),
   gen_server:cast(?MODULE, {on_message_publish, Message}),
   {ok, Message};
 
@@ -129,7 +128,7 @@ handle_call(_Request, _From, State = #hook_state{}) ->
   {noreply, NewState :: #hook_state{}, timeout() | hibernate} |
   {stop, Reason :: term(), NewState :: #hook_state{}}).
 handle_cast({on_message_publish, Message}, State = #hook_state{}) ->
-  io:format("cast on_message_push, ~s~n", [format(Message)]),
+  lager:debug("cast on_message_push, ~s~n", [format(Message)]),
   #message{
     from = ClientId,
     payload = Payload,
@@ -143,9 +142,9 @@ handle_cast({on_message_publish, Message}, State = #hook_state{}) ->
     <<"payload">> =>  Payload
   },
 
-  io:format("publish message: client: ~s,  topic: ~s,  payload: ~p~n", [ClientId, Topic, Payload]),
+  lager:info("publish message: client: ~s,  topic: ~s,  payload: ~p~n", [ClientId, Topic, Payload]),
   mqcli:publish(<<"test">>, <<"he">>, Msg),
-  io:format("publish message finished. ~n client: ~s,  topic: ~s,  payload: ~p~n", [ClientId, Topic, Payload]),
+  lager:debug("publish message finished. ~n client: ~s,  topic: ~s,  payload: ~p~n", [ClientId, Topic, Payload]),
   {noreply, State};
 handle_cast(_Request, State = #hook_state{}) ->
   io:format("handle cast~n"),

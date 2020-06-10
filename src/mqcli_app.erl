@@ -39,6 +39,7 @@
   {ok, pid(), State :: term()} |
   {error, Reason :: term()}).
 start(_StartType, _StartArgs) ->
+  print_banner(),
   lager:start(),
   Sup = case mqcli_sup:start_link() of
     {ok, Pid} -> Pid;
@@ -49,13 +50,14 @@ start(_StartType, _StartArgs) ->
 
   lager:error("Some message"),
   case application:get_env(?APP, routes) of
-    {ok, Routes} ->
-      lager:info("get routes from application env success. routes:~p~n", Routes);
+    {ok, _Routes} ->
+      lager:info("get routes from application env success.");
     undefined ->
       lager:error("get routes fail.")
   end,
   start_child(Sup, mqcli),
   start_child(Sup, mqcli_hook),
+  print_vsn(),
   publish_msg(),
   {ok, Sup}.
 
@@ -77,9 +79,9 @@ stop(_State) ->
 %%%===================================================================
 
 start_child(Sup, Module) ->
-  io:fwrite("start child: ~p~n", [Module]),
+  lager:info("start child: ~p~n", [Module]),
   {ok, Cpid} = supervisor:start_child(Sup, worker_spec(Module)),
-  io:fwrite("child: ~p started ~n", [Cpid]).
+  lager:info("child: ~p started ~n", [Cpid]).
 
 worker_spec(Module) ->
   worker_spec(Module, start_link, []).
@@ -88,15 +90,15 @@ worker_spec(M, F, A) ->
 
 publish_msg() ->
   mqcli_hook:on_message_publish(#message{from = testpush, topic = <<"/test">>, payload = #{<<"hello">> => <<"world">>}}, <<"_">>),
-  io:format("send msg~n~n~n"),
+  lager:debug("send msg finish.~n"),
   timer:sleep(2000),
   publish_msg().
 
-test1() ->
-  {ok, Connection} =
-    amqp_connection:start(#amqp_params_network{}),
-  {ok, Channel} = amqp_connection:open_channel(Connection),
-  ok = amqp_channel:close(Channel),
-  ok = amqp_connection:close(Connection),
-  ok.
+print_banner() ->
+  io:format("Starting ~s on node ~s~n", [?APP, node()]).
+
+print_vsn() ->
+  {ok, Descr} = application:get_key(description),
+  {ok, Vsn} = application:get_key(vsn),
+  io:format("~s ~s is running now!~n", [Descr, Vsn]).
 
