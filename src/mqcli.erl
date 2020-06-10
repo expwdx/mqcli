@@ -32,7 +32,7 @@ publish(Exchange, RoutingKey, Msg) when is_binary(Msg) ->
   ok;
 
 publish(Exchange, RoutingKey, Msg) ->
-  publish(Exchange, RoutingKey, jiffy:encode(Msg)).
+  publish(Exchange, RoutingKey, jsx:encode(Msg)).
 
 
 %%%===================================================================
