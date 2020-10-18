@@ -66,13 +66,25 @@ init([]) ->
       io:format("start amqp client error.~n"),
       Error
   end,
-  {ok, Connection} = amqp_connection:start(
-    #amqp_params_network{
-      username = <<"marco">>,
-      password = <<"top123.">>,
-      port = 5672
-    }
-  ),
+  {ok, ConfigSpecs} = application:get_env(?APP, amqp_uri),
+  {ok, AmqpConfig} = amqp_uri:parse(ConfigSpecs),
+  lager:debug("amqp_uri: ~p~n", [AmqpConfig]),
+  {ok, Connection} = amqp_connection:start(AmqpConfig),
+%%  case amqp_connection:start(AmqpConfig) of
+%%    {ok, _Connection} ->
+%%      io:format("consumer connect success. ConnPid: ~p~n", [_Connection]);
+%%    {error, _Error} ->
+%%      io:format("consumer connect fail. Error: ~p~n", [_Error])
+%%  end,
+
+%%  {ok, Connection} = amqp_connection:start(
+%%    #amqp_params_network{
+%%      username = <<"marco">>,
+%%      password = <<"top123.">>,
+%%      port = 5672
+%%    }
+%%  ),
+
   io:format("publisher connect success. ConnPid: ~p~n", [Connection]),
   {ok, Channel} = amqp_connection:open_channel(Connection),
   io:format("publisher channel: ~p~n", [Channel]),

@@ -48,9 +48,10 @@ start(_StartType, _StartArgs) ->
   io:format("application start, PID: ~p~n", [Sup]),
 %%  application:get_env(lager),
 
-  lager:error("Some message"),
+  lager:info("get env, app: ~p~n", [?APP]),
   case application:get_env(?APP, routes) of
     {ok, _Routes} ->
+      lager:debug("routes: ~p~n", [_Routes]),
       lager:info("get routes from application env success.");
     undefined ->
       lager:error("get routes fail.")
