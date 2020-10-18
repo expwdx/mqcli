@@ -66,7 +66,13 @@ init([]) ->
       io:format("start amqp client error.~n"),
       Error
   end,
-  {ok, Connection} = amqp_connection:start(#amqp_params_network{port = 5672}),
+  {ok, Connection} = amqp_connection:start(
+    #amqp_params_network{
+      username = <<"marco">>,
+      password = <<"top123.">>,
+      port = 5672
+    }
+  ),
   io:format("publisher connect success. ConnPid: ~p~n", [Connection]),
   {ok, Channel} = amqp_connection:open_channel(Connection),
   io:format("publisher channel: ~p~n", [Channel]),
