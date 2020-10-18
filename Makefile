@@ -26,7 +26,6 @@ all: build docs release
 
 build: $(REBAR3)
 	@$(REBAR3) compile
-	@erl -env ERL_LIBS '_build/default/lib/amqp_client' '_build/default/lib/rabbit_common' '_build/default/lib/amqp_client/ebin' -pa '_build/default/lib/mqcli/ebin' -eval "mqcli:start('hello', 'world')"
 
 $(REBAR3):
 	wget $(REBAR3_URL) || curl -Lo rebar3 $(REBAR3_URL)

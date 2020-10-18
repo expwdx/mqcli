@@ -60,7 +60,11 @@ init([]) ->
 
 %%  {ok, ConfigSpecs} = application:get_env(?APP, amqp_uri),
 %%  {ok, AmqpConfig} = amqp_uri:parse(ConfigSpecs),
-  {ok, Connection} = amqp_connection:start(#amqp_params_network{port = 5672}),
+  {ok, Connection} = amqp_connection:start(#amqp_params_network{
+    username = <<"marco">>,
+    password = <<"top123.">>,
+    port = 5672
+  }),
 %%  {ok, Connection} = case amqp_connection:start(#amqp_params_network{port = 5672}) of
 %%                       {ok, _Connection} ->
 %%                         io:format("consumer connect success. ConnPid: ~p~n", [_Connection]);
