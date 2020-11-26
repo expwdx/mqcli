@@ -58,6 +58,7 @@ start(_StartType, _StartArgs) ->
   end,
   start_child(Sup, mqcli),
 %%  start_child(Sup, mqcli_rabbitmq_hook),
+  start_child(Sup, mqcli_nsq_pub),
   start_child(Sup, mqcli_nsq_hook),
   print_vsn(),
 %%  publish_msg_to_rabbitmq(),
@@ -101,7 +102,7 @@ publish_msg_to_rabbitmq() ->
   publish_msg_to_rabbitmq().
 
 publish_msg_to_nsq() ->
-  mqcli_rabbitmq_hook:on_message_publish(
+  mqcli_nsq_hook:on_message_publish(
     #message{from = testpush, topic = <<"/test">>, payload = #{<<"hello">> => <<"world">>}},
     <<"_">>
   ),

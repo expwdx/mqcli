@@ -41,6 +41,7 @@ init([]) ->
   ],
 
   Topics = [
+    {<<"test">>, Channels, [{"localhost", 4150}]},
     {<<"topic1">>, Channels, [{"localhost", 4150}]},
     {<<"topic2">>, Channels, [{"localhost", 4150}]}
   ],
@@ -56,11 +57,13 @@ handle_call(_Request, _From, State = #mqcli_nsq_pub_state{}) ->
 
 handle_cast({publish, Topic, Msg}, State = #mqcli_nsq_pub_state{}) ->
   %% Publish a message
+%%  ensq:send(<<"topic1">>, <<"hello there!">>),
+  ensq:send(topic1, Msg),
   ensq:send(Topic, Msg),
   {noreply, State};
 handle_cast(_Request, State = #mqcli_nsq_pub_state{}) ->
-  ensq:send(<<"topic1">>, <<"hello there!">>),
-  ensq:send(<<"topic2">>, <<"hello there!">>),
+%%  ensq:send(<<"topic1">>, <<"hello there!">>),
+%%  ensq:send(<<"topic2">>, <<"hello there!">>),
   {noreply, State}.
 
 handle_info(_Info, State = #mqcli_nsq_pub_state{}) ->
