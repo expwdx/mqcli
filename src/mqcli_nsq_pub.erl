@@ -8,6 +8,8 @@
 
 -behaviour(gen_server).
 
+-export([publish/2]).
+
 -export([start_link/0]).
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
   code_change/3]).
@@ -19,6 +21,7 @@
 -spec(publish(Topic:: binary() | bitstring(), Msg:: term() | iodata() | binary()) -> ok).
 publish(Topic, Msg) when is_binary(Msg) ->
   gen_server:cast(?MODULE, {publish, Topic, Msg}),
+  lager:debug("publish message finished. ~n topic: ~s,  payload: ~p~n", [Topic, Msg]),
   ok;
 
 publish(Topic, Msg) ->
@@ -47,6 +50,7 @@ init([]) ->
   ],
 
   ensq:init({DiscoveryServers, Topics}),
+  lager:debug("ensq init finished."),
 
   %% Sending a message to a topic
   %%  ensq:send(test, <<"hello there!">>),
@@ -57,8 +61,9 @@ handle_call(_Request, _From, State = #mqcli_nsq_pub_state{}) ->
 
 handle_cast({publish, Topic, Msg}, State = #mqcli_nsq_pub_state{}) ->
   %% Publish a message
-%%  ensq:send(<<"topic1">>, <<"hello there!">>),
-  ensq:send(topic1, Msg),
+  ensq:send(<<"test">>, <<"hello there!">>),
+  lager:debug("send message finished. ~n topic: ~s,  payload: ~p~n", [Topic, Msg]),
+%%  ensq:send(topic1, Msg),
   ensq:send(Topic, Msg),
   {noreply, State};
 handle_cast(_Request, State = #mqcli_nsq_pub_state{}) ->

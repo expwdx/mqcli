@@ -14,6 +14,10 @@
 -export([init/1, handle_call/3, handle_cast/2, handle_info/2, terminate/2,
   code_change/3]).
 
+%% Message Pubsub Hooks
+-export([ on_message_publish/2
+]).
+
 -define(SERVER, ?MODULE).
 
 -record(mqcli_nsq_hook_state, {}).
