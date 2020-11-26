@@ -61,7 +61,8 @@ handle_call(_Request, _From, State = #mqcli_nsq_pub_state{}) ->
 
 handle_cast({publish, Topic, Msg}, State = #mqcli_nsq_pub_state{}) ->
   %% Publish a message
-  ensq:send(<<"test">>, <<"hello there!">>),
+  lager:debug("send message start. ~n topic: ~s,  payload: ~p~n", [Topic, Msg]),
+  ensq:send(test, <<"hello there!">>),
   lager:debug("send message finished. ~n topic: ~s,  payload: ~p~n", [Topic, Msg]),
 %%  ensq:send(topic1, Msg),
   ensq:send(Topic, Msg),
