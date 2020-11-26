@@ -68,7 +68,7 @@ handle_cast({on_message_publish, Message}, State = #mqcli_nsq_hook_state{}) ->
   },
 
   lager:info("publish message: client: ~s,  topic: ~s,  payload: ~p~n", [ClientId, Topic, Payload]),
-  mqcli_nsq_pub:publish(<<"test">>, <<"he">>, Msg),
+  mqcli_nsq_pub:publish(<<"test">>, Msg),
   lager:debug("publish message finished. ~n client: ~s,  topic: ~s,  payload: ~p~n", [ClientId, Topic, Payload]),
   {noreply, State};
 handle_cast(_Request, State = #mqcli_nsq_hook_state{}) ->
