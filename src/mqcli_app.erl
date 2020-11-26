@@ -57,9 +57,11 @@ start(_StartType, _StartArgs) ->
       lager:error("get routes fail.")
   end,
   start_child(Sup, mqcli),
-  start_child(Sup, mqcli_hook),
+%%  start_child(Sup, mqcli_rabbitmq_hook),
+  start_child(Sup, mqcli_nsq_hook),
   print_vsn(),
-  publish_msg(),
+%%  publish_msg_to_rabbitmq(),
+  publish_msg_to_nsq(),
   {ok, Sup}.
 
 %%--------------------------------------------------------------------
@@ -89,11 +91,23 @@ worker_spec(Module) ->
 worker_spec(M, F, A) ->
   {M, {M, F, A}, permanent, 10000, worker, [M]}.
 
-publish_msg() ->
-  mqcli_hook:on_message_publish(#message{from = testpush, topic = <<"/test">>, payload = #{<<"hello">> => <<"world">>}}, <<"_">>),
+publish_msg_to_rabbitmq() ->
+  mqcli_rabbitmq_hook:on_message_publish(
+    #message{from = testpush, topic = <<"/test">>, payload = #{<<"hello">> => <<"world">>}},
+    <<"_">>
+  ),
   lager:debug("send msg finish.~n"),
   timer:sleep(2000),
-  publish_msg().
+  publish_msg_to_rabbitmq().
+
+publish_msg_to_nsq() ->
+  mqcli_rabbitmq_hook:on_message_publish(
+    #message{from = testpush, topic = <<"/test">>, payload = #{<<"hello">> => <<"world">>}},
+    <<"_">>
+  ),
+  lager:debug("send msg finish.~n"),
+  timer:sleep(2000),
+  publish_msg_to_nsq().
 
 print_banner() ->
   io:format("Starting ~s on node ~s~n", [?APP, node()]).

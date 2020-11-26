@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 09. Jun 2020 7:56 PM
 %%%-------------------------------------------------------------------
--module(mqcli_hook).
+-module(mqcli_rabbitmq_hook).
 -author("marco").
 
 -behaviour(gen_server).
