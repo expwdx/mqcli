@@ -8,6 +8,8 @@
 
 -behaviour(gen_server).
 
+-include("mqcli.hrl").
+
 -export([publish/2]).
 
 -export([start_link/0]).
@@ -36,7 +38,10 @@ start_link() ->
   gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 init([]) ->
-  DiscoveryServers = [{"localhost", 4161}],
+  {ok, DiscoveryServers} = application:get_env(?APP, nsqlookupd),
+  {ok, Workers} = application:get_env(?APP, nsqd),
+
+  lager:info("nsqloopupd: ~p, nsqd: ~p~n", [DiscoveryServers, Workers]),
 
   Channels = [
     {<<"test1">>, ensq_debug_callback},       %% Callback Module
@@ -44,9 +49,9 @@ init([]) ->
   ],
 
   Topics = [
-    {<<"test">>, Channels, [{"localhost", 4150}]},
-    {<<"topic1">>, Channels, [{"localhost", 4150}]},
-    {<<"topic2">>, Channels, [{"localhost", 4150}]}
+    {<<"test">>, Channels, Workers},
+    {<<"topic1">>, Channels, Workers},
+    {<<"topic2">>, Channels, Workers}
   ],
 
   ensq:init({DiscoveryServers, Topics}),
