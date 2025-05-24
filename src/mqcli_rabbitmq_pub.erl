@@ -6,7 +6,7 @@
 %%% @end
 %%% Created : 06. Jun 2020 4:05 PM
 %%%-------------------------------------------------------------------
--module(mqcli).
+-module(mqcli_rabbitmq_pub).
 -author("marco").
 
 -behaviour(gen_server).

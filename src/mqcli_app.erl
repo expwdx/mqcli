@@ -56,7 +56,7 @@ start(_StartType, _StartArgs) ->
     undefined ->
       lager:error("get routes fail.")
   end,
-  start_child(Sup, mqcli),
+  % start_child(Sup, mqcli_rabbitmq_pub),
 %%  start_child(Sup, mqcli_rabbitmq_hook),
   start_child(Sup, mqcli_nsq_pub),
   start_child(Sup, mqcli_nsq_hook),
